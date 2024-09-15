@@ -1,0 +1,17 @@
+{
+    "name": "dm-tmux",
+    "version": "1.0.0",
+    "main": "script.js",
+    "scripts": {
+        "build": "rm ~/.config/tmux/build.tmux && node ./script.js",
+        "clear": "rm ~/.config/tmux/build.tmux"
+    },
+    "keywords": [],
+    "author": "DmitriiBr",
+    "license": "ISC",
+    "description": "Tmux theming with node",
+    "prettier": {
+        "tabWidth": 4,
+        "semi": false
+    }
+}
