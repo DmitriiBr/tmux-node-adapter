@@ -1,10 +1,11 @@
 {
     "name": "dm-tmux",
     "version": "1.0.0",
-    "main": "script.js",
+    "main": "./src/script.js",
     "scripts": {
-        "build": "rm ~/.config/tmux/build.tmux && node ./script.js",
-        "clear": "rm ~/.config/tmux/build.tmux"
+        "build": "node ./src/script.js",
+        "clear": "rm ~/.config/tmux/build.tmux",
+        "build:clean": "rm ~/.config/tmux/build.tmux && node ./script.js"
     },
     "keywords": [],
     "author": "DmitriiBr",
@@ -13,5 +14,8 @@
     "prettier": {
         "tabWidth": 4,
         "semi": false
+    },
+    "dependencies": {
+        "@tmux-node-adapter/lib": "file:lib"
     }
 }

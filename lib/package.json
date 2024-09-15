@@ -1,0 +1,6 @@
+{
+    "name": "@tmux-node-adapter/lib",
+    "version": "1.0.0",
+    "description": "Tmux node adapter lib",
+    "exports": "./index.js"
+}
