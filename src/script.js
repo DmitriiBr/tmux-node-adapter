@@ -5,15 +5,17 @@ const { constants, appendLineToFile } = require("@tmux-node-adapter/lib")
 const SET_GLOBAL = "set -g"
 const STATUS_BG = "status-bg"
 const STATUS_FG = "status-fg"
+const STATUS_LEFT = "status-left"
 const DISPLAY_PANES_COLOR = "display-panes-colour"
 const DISPLAY_PANES_ACTIVE_COLOR = "display-panes-active-colour"
 
-class TmuxStylesBuilder {
-    #tmuxStyles = new Map([
+class TmuxPropsBuilder {
+    #tmuxProps = new Map([
         [STATUS_BG, ""],
         [STATUS_FG, ""],
         [DISPLAY_PANES_COLOR, ""],
         [DISPLAY_PANES_ACTIVE_COLOR, ""],
+        [STATUS_LEFT, ""],
     ])
 
     constructor(buildPath) {
@@ -21,17 +23,17 @@ class TmuxStylesBuilder {
     }
 
     setProperty(property, value) {
-        if (!this.#tmuxStyles.has(property)) {
+        if (!this.#tmuxProps.has(property)) {
             throw new TypeError("No such propety: " + property)
         }
 
-        this.#tmuxStyles.set(property, value)
+        this.#tmuxProps.set(property, value)
 
         return this
     }
 
     buildStyles() {
-        this.#tmuxStyles.forEach((value, key) => {
+        this.#tmuxProps.forEach((value, key) => {
             if (value) {
                 const content =
                     `${SET_GLOBAL} ${key} ` +
@@ -46,32 +48,47 @@ class TmuxStylesBuilder {
     }
 }
 
-class TmuxStatusBlock {
+class TmuxBlockBuilder {
     static block = ""
     static uniqueMethodsMap = new Map()
     #reset = "nobold,noitalics,nounderscore"
 
     foreground(color) {
-        if (TmuxStatusBlock.uniqueMethodsMap.has("foreground"))
+        if (TmuxBlockBuilder.uniqueMethodsMap.has("foreground"))
             throw new TypeError("Foreground was already declared")
 
-        TmuxStatusBlock.block + `fg=${color},`
-        TmuxStatusBlock.uniqueMethodsMap.set("foreground", true)
+        TmuxBlockBuilder.block += `fg=${color},`
+        TmuxBlockBuilder.uniqueMethodsMap.set("foreground", true)
 
         return this
     }
     background(color) {
-        if (TmuxStatusBlock.uniqueMethodsMap.has("background"))
+        if (TmuxBlockBuilder.uniqueMethodsMap.has("background"))
             throw new TypeError("Background was already declared")
 
-        TmuxStatusBlock.block + `bg=${color},`
-        TmuxStatusBlock.uniqueMethodsMap.set("background", true)
+        TmuxBlockBuilder.block += `bg=${color},`
+        TmuxBlockBuilder.uniqueMethodsMap.set("background", true)
+
+        return this
+    }
+
+    bold() {
+        if (TmuxBlockBuilder.uniqueMethodsMap.has("bold"))
+            throw new TypeError("Bold was already declared")
+
+        TmuxBlockBuilder.block += `bold,`
+        TmuxBlockBuilder.uniqueMethodsMap.set("bold", true)
 
         return this
     }
 
     create() {
-        return `#[${TmuxStatusBlock.block}${this.#reset}]`
+        const block = TmuxBlockBuilder.block
+
+        TmuxBlockBuilder.block = ""
+        TmuxBlockBuilder.uniqueMethodsMap.clear()
+
+        return `#[${block}]`
     }
 }
 
@@ -94,15 +111,35 @@ class TmuxStatus {
 }
 
 const main = async () => {
+    const args = process.argv
+
+    const tmuxPropsBuilder = new TmuxPropsBuilder(constants.BUILD_PATH)
+    const blockBuilder = new TmuxBlockBuilder()
+
+    const leftBlock1 = blockBuilder
+        .foreground("colors_normal_dark")
+        .background("colors_normal_blue")
+        .bold()
+        .create()
+
+    const leftBlock2 = blockBuilder
+        .foreground("colors_normal_dark")
+        .background("colors_normal_blue")
+        .bold()
+        .create()
+
+    console.log(leftBlock1, leftBlock2)
+
+    if (args.find((el) => el === "--noEmit")) return
+
     await buildFromConfiguration(constants.CONFIG_PATH)
 
-    const tmuxStyles = new TmuxStylesBuilder(constants.BUILD_PATH)
-
-    tmuxStyles
+    tmuxPropsBuilder
         .setProperty(STATUS_BG, "colors_dim_black")
         .setProperty(STATUS_FG, "colors_normal_muted")
         .setProperty(DISPLAY_PANES_COLOR, "colors_panes_background")
         .setProperty(DISPLAY_PANES_ACTIVE_COLOR, "colors_panes_foreground")
+        .setProperty(STATUS_LEFT)
         .buildStyles()
 }
 
