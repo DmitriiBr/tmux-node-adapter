@@ -1,9 +1,9 @@
 {
     "name": "dm-tmux",
     "version": "1.0.0",
-    "main": "./src/script.js",
+    "main": "main.js",
     "scripts": {
-        "build": "node ./src/script.js",
+        "build": "node main.js",
         "clear": "rm ~/.config/tmux/build.tmux",
         "build:clean": "rm ~/.config/tmux/build.tmux && node ./script.js"
     },
