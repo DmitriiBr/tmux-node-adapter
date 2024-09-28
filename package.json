@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "main": "main.js",
     "scripts": {
-        "build": "node main.js",
+        "build": "node main.js --noEmit",
         "clear": "rm ~/.config/tmux/build.tmux",
         "build:clean": "rm ~/.config/tmux/build.tmux && node ./script.js"
     },

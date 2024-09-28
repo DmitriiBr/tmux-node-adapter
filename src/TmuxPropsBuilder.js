@@ -4,13 +4,17 @@ const { SET_GLOBAL } = constants.TMUX
 
 /**
  * Basic class for setting tmux properties
+ * @param {string} buildPath
+ * @param {boolean} debug - if `true`, config file will not created
  */
 class TmuxPropsBuilder {
     #buildPath = ""
+    #debug = false
     #tmuxProps = new Map([])
 
-    constructor(buildPath) {
+    constructor({ buildPath, debug }) {
         this.#buildPath = buildPath || constants.BUILD_PATH
+        this.#debug = debug || false
     }
 
     /**
@@ -42,21 +46,31 @@ class TmuxPropsBuilder {
     }
 
     /**
+     * Create concent for attribute
+     * @param {string} key
+     * @param {string} value
+     */
+    #getContent(key, value) {
+        return `${SET_GLOBAL} ${key} ` + '"' + value + '"' + constants.NEW_LINE
+    }
+
+    /**
      * Appends all properties, set by `setProperty` method to `build.tmux` file.
      *
      * All properties are setted globally with `-g` flag.
      */
-    buildStyles() {
+    build() {
         this.#tmuxProps.forEach((value, key) => {
             if (value) {
-                const content =
-                    `${SET_GLOBAL} ${key} ` +
-                    '"${' +
-                    value +
-                    '}"' +
-                    constants.NEW_LINE
+                const content = this.#getContent(key, value)
 
-                appendLineToFile(content, this.#buildPath)
+                if (this.#debug) {
+                    console.group()
+                    console.log("KEY: ", key)
+                    console.log("VALUE: ", value)
+                    console.log("CONTENT: ", content)
+                    console.groupEnd()
+                } else appendLineToFile(content, this.#buildPath)
             }
         })
     }

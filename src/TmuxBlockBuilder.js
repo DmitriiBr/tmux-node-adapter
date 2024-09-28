@@ -2,20 +2,31 @@
  * Class, that helps creating a single block of tmux UI
  */
 class TmuxBlockBuilder {
-    static block = ""
-    static uniqueMethodsMap = new Map()
+    #tests = []
+    #uniqueMethodsMap = new Map()
     #reset = "nobold,noitalics,nounderscore"
 
     /**
-     * Set block foreground color
-     * @param {string} color - should be in hex format
+     * Handle error, if such property exists in map
+     * @param {string} property
      */
-    foreground(color) {
-        if (TmuxBlockBuilder.uniqueMethodsMap.has("foreground"))
-            throw new TypeError("Foreground was already declared")
+    handleError(property) {
+        if (this.#uniqueMethodsMap.has(property)) {
+            throw new TypeError(
+                `"${property}" was already declared was already declared`,
+            )
+        }
+    }
 
-        TmuxBlockBuilder.block += `fg=${color},`
-        TmuxBlockBuilder.uniqueMethodsMap.set("foreground", true)
+    /**
+     * Set block foreground color
+     * @param {string} value
+     */
+    foreground(value) {
+        this.handleError("foreground")
+
+        this.#tests.push(`fg=${value}`)
+        this.#uniqueMethodsMap.set("foreground", true)
 
         return this
     }
@@ -24,23 +35,21 @@ class TmuxBlockBuilder {
      * Set block background color
      * @param {string} color - should be in hex format
      */
-    background(color) {
-        if (TmuxBlockBuilder.uniqueMethodsMap.has("background"))
-            throw new TypeError("Background was already declared")
+    background(value) {
+        this.handleError("background")
 
-        TmuxBlockBuilder.block += `bg=${color},`
-        TmuxBlockBuilder.uniqueMethodsMap.set("background", true)
+        this.#tests.push(`bg=${value}`)
+        this.#uniqueMethodsMap.set("background", true)
 
         return this
     }
 
     /** Set block font weight to bold */
     bold() {
-        if (TmuxBlockBuilder.uniqueMethodsMap.has("bold"))
-            throw new TypeError("Bold was already declared")
+        this.handleError("bold")
 
-        TmuxBlockBuilder.block += `bold,`
-        TmuxBlockBuilder.uniqueMethodsMap.set("bold", true)
+        this.#tests.push(`bold`)
+        this.#uniqueMethodsMap.set("bold", true)
 
         return this
     }
@@ -51,10 +60,9 @@ class TmuxBlockBuilder {
      * @returns {string} constructed string
      */
     create() {
-        const block = TmuxBlockBuilder.block
+        const block = this.#tests.join(",")
 
-        TmuxBlockBuilder.block = ""
-        TmuxBlockBuilder.uniqueMethodsMap.clear()
+        this.#uniqueMethodsMap.clear()
 
         return `#[${block}]`
     }
