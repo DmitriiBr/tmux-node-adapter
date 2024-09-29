@@ -5,7 +5,8 @@
     "scripts": {
         "build": "node main.js --noEmit",
         "clear": "rm ~/.config/tmux/build.tmux",
-        "build:clean": "rm ~/.config/tmux/build.tmux && node ./script.js"
+        "build:clean": "rm ~/.config/tmux/build.tmux && node ./script.js",
+        "test": "node --test"
     },
     "keywords": [],
     "author": "DmitriiBr",
